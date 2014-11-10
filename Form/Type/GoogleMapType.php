@@ -34,15 +34,23 @@ class GoogleMapType extends AbstractType
             'options'        => array(), // the options for both the fields
             'lat_options'  => array(),   // the options for just the lat field
             'lng_options' => array(),    // the options for just the lng field
-            'lat_name'       => 'lat',   // the name of the lat field
-            'lng_name'       => 'lng',   // the name of the lng field
+            'lat_name' => 'latitude',   // the name of the lat field
+            'lng_name' => 'longitude',   // the name of the lng field
             'error_bubbling' => false,
             'map_width'      => 300,     // the width of the map
             'map_height'     => 300,     // the height of the map
-            'default_lat'    => 51.5,    // the starting position on the map
-            'default_lng'    => -0.1245, // the starting position on the map
+            'default_lat' => 40.4167754,    // the starting position on the map
+            'default_lng' => -3.70379019, // the starting position on the map
+            'default_zoom' => 10,
+            'include_js' => false, // If include js (only once for each template to avoid js problems)
             'include_jquery' => false,   // jquery needs to be included above the field (ie not at the bottom of the page)
-            'include_gmaps_js'=>true     // is this the best place to include the google maps javascript?
+            'include_gmaps_js' => false,     // is this the best place to include the google maps javascript?
+            'search' => array( //Search box configuration
+                'enabled' => false,
+            ),
+            'show_info' => array( //Show info configuration
+                'enabled' => false,
+            )
         ));
     }
 
@@ -51,14 +59,18 @@ class GoogleMapType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-            $view->vars['lat_name'] = $options['lat_name']; 
-            $view->vars['lng_name'] = $options['lng_name']; 
-            $view->vars['map_width'] = $options['map_width']; 
-            $view->vars['map_height'] = $options['map_height']; 
-            $view->vars['default_lat'] = $options['default_lat']; 
-            $view->vars['default_lng'] = $options['default_lng']; 
-            $view->vars['include_jquery'] = $options['include_jquery']; 
-            $view->vars['include_gmaps_js'] = $options['include_gmaps_js'];
+        $view->vars['lat_name'] = $options['lat_name'];
+        $view->vars['lng_name'] = $options['lng_name'];
+        $view->vars['map_width'] = $options['map_width'];
+        $view->vars['map_height'] = $options['map_height'];
+        $view->vars['default_lat'] = $options['default_lat'];
+        $view->vars['default_lng'] = $options['default_lng'];
+        $view->vars['include_jquery'] = $options['include_jquery'];
+        $view->vars['include_gmaps_js'] = $options['include_gmaps_js'];
+        $view->vars['default_zoom'] = $options['default_zoom'];
+        $view->vars['include_js'] = $options['include_js'];
+        $view->vars['search'] = $options['search'];
+        $view->vars['show_info'] = $options['show_info'];
     }
 
     public function getParent()

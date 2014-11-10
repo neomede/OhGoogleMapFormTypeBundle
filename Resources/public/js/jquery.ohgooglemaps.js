@@ -3,19 +3,23 @@
 	function GoogleMapType(settings, map_el) {
 
 		var settings = $.extend( {
-			  'search_input_el'    : null,
-			  'search_action_el'   : null,
-			  'search_error_el'    : null,
-			  'current_position_el': null,
-			  'default_lat'        : '1',
-			  'default_lng'        : '-1',
-			  'default_zoom'       : 5,
-			  'lat_field'          : null,
-			  'lng_field'          : null,
-			  'callback'           : function (location, gmap) {},
-			  'error_callback'     : function(status) {
-			  	$this.settings.search_error_el.text(status);
-			  },
+            'search_input_el'    : null,
+            'search_action_el'   : null,
+            'search_error_el'    : null,
+            'current_position_el': null,
+            'default_lat'        : '1',
+            'default_lng'        : '-1',
+            'default_zoom'       : 5,
+            'lat_field'          : null,
+            'lng_field'          : null,
+            'callback'           : function (location, gmap) {},
+            'error_callback'     : function(status) {
+                $this.settings.search_error_el.text(status);
+            },
+            'init_marker'        : false,
+            'show_info'          : true,
+            'show_info_id'       : 'info_widget',
+            'show_searchbox'     : false
 			}, settings);
 
 		this.settings = settings;
@@ -36,27 +40,21 @@
 				center: center,
 				mapTypeId: google.maps.MapTypeId.ROADMAP
 			};
-			
+
 			var $this = this;
-			
+
 			this.map =  new google.maps.Map(this.map_el[0], mapOptions);
 
-			this.addMarker(center);
-
-			google.maps.event.addListener(this.marker, "dragend", function(event) {
-
-				var point = $this.marker.getPosition();
-				$this.map.panTo(point);
-				$this.updateLocation(point);
-
-			});
+            if(this.settings.init_marker == true){
+                this.addMarker(center);
+            }
 
 			google.maps.event.addListener(this.map, 'click', function(event) {
 				$this.insertMarker(event.latLng);
 			});
 
 			this.settings.search_action_el.click($.proxy(this.searchAddress, $this));
-			
+
 			this.settings.current_position_el.click($.proxy(this.currentPosition, $this));
 		},
 
@@ -78,23 +76,23 @@
 		currentPosition : function(e){
 			e.preventDefault();
 			var $this = this;
-			
+
 			if ( navigator.geolocation ) {
-				navigator.geolocation.getCurrentPosition ( 
+				navigator.geolocation.getCurrentPosition (
 					function(position) {
 						var clientPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 						$this.insertMarker(clientPosition);
 						$this.map.setCenter(clientPosition);
 						$this.map.setZoom(16);
-					}, 
+					},
 					function(error) {
 						$this.settings.error_callback(error);
 					}
-				);      
+				);
 			} else {
 				$this.settings.search_error_el.text('Your broswer does not support geolocation');
 			}
-			
+
 		},
 
 		updateLocation : function (location){
@@ -114,6 +112,15 @@
 					draggable: true
 				});
 			}
+
+            var $this = this;
+            google.maps.event.addListener(this.marker, "dragend", function(event) {
+
+                var point = $this.marker.getPosition();
+                $this.map.panTo(point);
+                $this.updateLocation(point);
+
+            });
 		},
 
 		insertMarker : function (position) {
@@ -124,11 +131,28 @@
 			this.updateLocation(position);
 
 		},
+
 		removeMarker : function () {
 			if(this.marker != undefined){
 				this.marker.setMap(null);
 			}
-		}
+		},
+
+        showInfo : function () {
+            var widgetDiv = document.getElementById(this.settings.show_info_id);
+            $("#"+this.settings.show_info_id).removeClass('hidden');
+            $("#"+this.settings.show_info_id+" strong:first").text(this.settings.show_info_title);
+            $("#"+this.settings.show_info_id+" p:first").text(this.settings.show_info_text);
+            this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(widgetDiv);
+        },
+
+        showSearchBox : function () {
+            var searchbox = document.getElementById('searchbox');
+            this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchbox);
+
+            var current_position = document.getElementById('current_position');
+            this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(current_position);
+        }
 
 	}
 
@@ -143,24 +167,38 @@
 
 			map_el.data('map').initMap();
 
+            if(settings.show_info){
+                map_el.data('map').showInfo();
+            }
+
+            if(settings.show_searchbox){
+                map_el.data('map').showSearchBox();
+            }
+
 		});
 
 	};
-	
+
 	$.fn.ohGoogleMapType.defaultSettings = {
-			  'search_input_el'    : null,
-			  'search_action_el'   : null,
-			  'search_error_el'    : null,
-			  'current_position_el': null,
-			  'default_lat'        : '1',
-			  'default_lng'        : '-1',
-			  'default_zoom'       : 5,
-			  'lat_field'          : null,
-			  'lng_field'          : null,
-			  'callback'           : function (location, gmap) {},
-			  'error_callback'     : function(status) {
-			  	$this.settings.search_error_el.text(status);
-			  }
-			}
+        'search_input_el'    : null,
+        'search_action_el'   : null,
+        'search_error_el'    : null,
+        'current_position_el': null,
+        'default_lat'        : '1',
+        'default_lng'        : '-1',
+        'default_zoom'       : 5,
+        'lat_field'          : null,
+        'lng_field'          : null,
+        'callback'           : function (location, gmap) {},
+        'error_callback'     : function(status) {
+            $this.settings.search_error_el.text(status);
+        },
+        'init_marker'        : false,
+        'show_info'          : true,
+        'show_info_id'       : 'info_widget',
+        'show_info_title'    : 'Add location',
+        'show_info_text'     : 'Click on the map to add or change your location',
+        'show_searchbox'     : false
+    }
 
 })( jQuery );

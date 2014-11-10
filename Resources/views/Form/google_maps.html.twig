@@ -1,56 +1,97 @@
+{% block oh_google_maps_stylesheet %}
+    {% stylesheets '@OhGoogleMapFormTypeBundle/Resources/public/css/ohgooglemaps.css' %}
+    <link href="{{ asset_url }}" rel="stylesheet" type="text/css" media="screen"/>
+    {% endstylesheets %}
+{% endblock %}
+
 {% block oh_google_maps_widget %}
 <div {{ block('widget_container_attributes') }}>
 	{% block oh_google_maps_html %} 
-	<div id="{{ id }}_container">
-		<input type="text" id="{{ id }}_input" /><button id="{{ id }}_search_button" class="btn">Search</button><br /><a href="#" id="{{ id }}_current_position">Current location</a>
-		<div id="{{ id }}_map_canvas" class="gmap" style="width: {{ map_width }}px; height: {{ map_height }}px"></div>
-		<div id="{{ id }}_error"></div>
+	<div id="{{ id }}_container" class="oh_google_maps">
+        <div id="{{ id }}_map_canvas" class="gmap" style="width: {{ map_width }}; height: {{ map_height }}"></div>
+        <div id="{{ id }}_error"></div>
 	</div>
 	{% endblock %}
-	{% block oh_google_maps_fields %} 
-		{% for child in form %}
-		    {{ form_row(child) }}
-        {% endfor %}
-	{% endblock %}
-	{% block oh_google_maps_javascripts %}
-		{% if include_jquery %}
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
-		{% endif %}
-		{% if include_gmaps_js %}
-		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
-		{% endif %}
-		{% javascripts
-			'@OhGoogleMapFormTypeBundle/Resources/public/js/jquery.ohgooglemaps.js'
-		%}
-		<script type="text/javascript" src="{{ asset_url }}"></script>
-		{% endjavascripts %}
-	{% endblock %}
-	{% block oh_google_maps_javascript %}
-		{% block oh_google_maps_callback %}
-			<script type="text/javascript">
-				var oh_google_maps_callback = function(location, gmap){
-					// your callback function here
-				}
-			</script>	
-		{% endblock %}
-		<script type="text/javascript">
-
-			$(function(){
-				$('#{{ id }}_map_canvas').ohGoogleMapType({
-				  'search_input_el'    : $('#{{ id }}_input'),
-				  'search_action_el'   : $('#{{ id }}_search_button'),
-				  'search_error_el'    : $('#{{ id }}_error'),
-				  'current_position_el': $('#{{ id }}_current_position'),
-				  'default_lat'        : '{% if value is defined and value.lat %}{{ value.lat }}{% else %}{{ default_lat }}{% endif %}',
-				  'default_lng'        : '{% if value is defined and value.lng %}{{ value.lng }}{% else %}{{ default_lng }}{% endif %}',
-				  'default_zoom'       : {% if value is defined and value.lat and value.lng %}15{% else %}5{% endif %},
-				  'lat_field'          : $('#{{ attribute(form, lat_name).vars.id }}'),
-				  'lng_field'          : $('#{{ attribute(form, lng_name).vars.id }}'),
-				  'callback'           : oh_google_maps_callback
-				});
-			});
-
-		</script>
+	{% block oh_google_maps_fields %}
+        {% if show_info and show_info.enabled is defined and show_info.enabled == true %}
+            <div id="info_widget">
+                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <strong></strong>
+                <p></p>
+            </div>
+        {% endif %}
+        <div class="map_fields" style="width: {{ map_width }}px;">
+            {% if search and search.enabled is defined and search.enabled == true %}
+                <div id="searchbox" class="controls">
+                    <input type="text" id="{{ (search.input_el is defined) ? search.input_el : id ~ '_input' }}" class="input_search"/>
+                    <a href="#" id="{{ (search.action_el is defined) ? search.action_el : id ~ '_search_button' }}" class="searchbutton">
+                        <span class="fa fa-search"></span>
+                    </a>
+                </div>
+                <div id="current_position">
+                    <a href="#" id="{{ id }}_current_position"><span class="fa fa-map-marker"></span> {{ search.current_position|trans({}, 'EffortBundle') }}</a>
+                </div>
+            {% endif %}
+            <div class="hidden">
+                {{ form_widget(form) }}
+            </div>
+        </div>
 	{% endblock %}
 </div>
+{% endblock %}
+
+
+{% block oh_google_maps_javascript %}
+    {% if include_js is defined and include_js %}
+        {% if include_jquery %}
+            <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+        {% endif %}
+        {% if include_gmaps_js %}
+        <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+        {% endif %}
+
+        {% javascripts '@OhGoogleMapFormTypeBundle/Resources/public/js/jquery.ohgooglemaps.js'%}
+        <script type="text/javascript" src="{{ asset_url }}"></script>
+        {% endjavascripts %}
+    {% endif %}
+    {% block position_callback %}
+        <script type="text/javascript">
+            var oh_google_maps_callback = function(location, gmap){
+                // your callback function here
+            }
+            var error_callback = function(status){
+                $('#{{ (search and search.error_el is defined) ? search.error_el : id ~ '_error' }}').html(
+                        '<div class="alert alert-warning alert-dismissible map-alert" role="alert">' +
+                                '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
+                                '<span>{{ 'effort.error.map.no_results'|trans({}, 'EffortBundle') }}</span>' +
+                                '</div>'
+                );
+
+                closeAlert(".map-alert");
+            }
+        </script>
+    {% endblock %}
+    <script type="text/javascript">
+
+        $(function(){
+            $('#{{ id }}_map_canvas').ohGoogleMapType({
+                'search_input_el'    : $('#{{ (search and search.input_el is defined) ? search.input_el : id ~ '_input' }}'),
+                'search_action_el'   : $('#{{ (search and search.action_el is defined) ? search.action_el : id ~ '_search_button' }}'),
+                'search_error_el'    : $('#{{ (search and search.error_el is defined) ? search.error_el : id ~ '_error' }}'),
+                'current_position_el': $('#{{ (search and search.current_position_el is defined) ? search.current_position_el : id ~ '_current_position' }}'),
+                'default_lat'        : {{ (value is defined and value is not null and value.latitude) ? value.latitude : default_lat }},
+                'default_lng'        : {{ (value is defined and value is not null and value.longitude) ? value.longitude : default_lng }},
+                'default_zoom'       : {{ default_zoom }},
+                'lat_field'          : $('#{{ attribute(form, lat_name).vars.id }}'),
+                'lng_field'          : $('#{{ attribute(form, lng_name).vars.id }}'),
+                'callback'           : oh_google_maps_callback,
+                'error_callback'     : error_callback,
+                'init_marker'        : {{ (value is defined and value is not null and value.latitude) ? "true" : "false" }},
+                'show_info'          : {{ (show_info and show_info.enabled is defined and show_info.enabled) ? "true" : "false" }},
+                'show_searchbox'     : {{ (search and search.enabled is defined and search.enabled) ? "true" : "false" }},
+                'show_info_title'    : "{{ (show_info and show_info.title) ? show_info.title|trans({}, 'EffortBundle') : "" }}",
+                'show_info_text'     : "{{ (show_info and show_info.text) ? show_info.text|trans({}, 'EffortBundle') : "" }}"
+            });
+        });
+    </script>
 {% endblock %}
