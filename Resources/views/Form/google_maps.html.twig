@@ -29,7 +29,7 @@
                     </a>
                 </div>
                 <div id="current_position">
-                    <a href="#" id="{{ id }}_current_position"><span class="fa fa-map-marker"></span> {{ search.current_position|trans({}, 'EffortBundle') }}</a>
+                    <a href="#" id="{{ id }}_current_position"><span class="fa fa-map-marker"></span> {{ search.current_position|trans({}, (search.translation_domain) ? show_info.translation_domain : "OhGoogleMapFormTypeBundle") }}</a>
                 </div>
             {% endif %}
             <div class="hidden">
@@ -60,14 +60,6 @@
                 // your callback function here
             }
             var error_callback = function(status){
-                $('#{{ (search and search.error_el is defined) ? search.error_el : id ~ '_error' }}').html(
-                        '<div class="alert alert-warning alert-dismissible map-alert" role="alert">' +
-                                '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
-                                '<span>{{ 'effort.error.map.no_results'|trans({}, 'EffortBundle') }}</span>' +
-                                '</div>'
-                );
-
-                closeAlert(".map-alert");
             }
         </script>
     {% endblock %}
@@ -89,8 +81,8 @@
                 'init_marker'        : {{ (value is defined and value is not null and value.latitude) ? "true" : "false" }},
                 'show_info'          : {{ (show_info and show_info.enabled is defined and show_info.enabled) ? "true" : "false" }},
                 'show_searchbox'     : {{ (search and search.enabled is defined and search.enabled) ? "true" : "false" }},
-                'show_info_title'    : "{{ (show_info and show_info.title) ? show_info.title|trans({}, 'EffortBundle') : "" }}",
-                'show_info_text'     : "{{ (show_info and show_info.text) ? show_info.text|trans({}, 'EffortBundle') : "" }}"
+                'show_info_title'    : "{{ (show_info and show_info.title) ? show_info.title|trans({}, (show_info.translation_domain) ? show_info.translation_domain : "OhGoogleMapFormTypeBundle") : "" }}",
+                'show_info_text'     : "{{ (show_info and show_info.text) ? show_info.text|trans({}, (show_info.translation_domain) ? show_info.translation_domain : "OhGoogleMapFormTypeBundle") : "" }}"
             });
         });
     </script>
