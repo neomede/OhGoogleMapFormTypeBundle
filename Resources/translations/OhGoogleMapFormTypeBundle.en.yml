@@ -1,0 +1,7 @@
+form:
+    search:
+        placeholder: "Search"
+        current_position: "Current position"
+    show_info:
+        title: "Info"
+        text: "Click into map to add or change the position"

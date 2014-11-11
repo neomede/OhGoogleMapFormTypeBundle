@@ -30,26 +30,30 @@ class GoogleMapType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
-            'type'           => 'text',  // the types to render the lat and lng fields as
-            'options'        => array(), // the options for both the fields
-            'lat_options'  => array(),   // the options for just the lat field
+            'type' => 'text',  // the types to render the lat and lng fields as
+            'options' => array(), // the options for both the fields
+            'lat_options' => array(),   // the options for just the lat field
             'lng_options' => array(),    // the options for just the lng field
             'lat_name' => 'latitude',   // the name of the lat field
             'lng_name' => 'longitude',   // the name of the lng field
             'error_bubbling' => false,
-            'map_width'      => 300,     // the width of the map
-            'map_height'     => 300,     // the height of the map
+            'map_width' => 300,     // the width of the map
+            'map_height' => 300,     // the height of the map
             'default_lat' => 40.4167754,    // the starting position on the map
             'default_lng' => -3.70379019, // the starting position on the map
             'default_zoom' => 10,
             'include_js' => false, // If include js (only once for each template to avoid js problems)
             'include_jquery' => false,   // jquery needs to be included above the field (ie not at the bottom of the page)
             'include_gmaps_js' => false,     // is this the best place to include the google maps javascript?
-            'search' => array( //Search box configuration
-                'enabled' => false,
+            'search' => array( //Search box configuration -> false or empty array if you don't want a search box
+                'translation_domain' => 'OhGoogleMapFormTypeBundle',
+                'placeholder' => 'form.search.placeholder',
+                'current_position' => 'form.search.current_position',
             ),
-            'show_info' => array( //Show info configuration
-                'enabled' => false,
+            'show_info' => array( //Show info configuration -> false or empty array if you don't want a show info
+                'translation_domain' => 'OhGoogleMapFormTypeBundle',
+                'title' => 'form.show_info.title',
+                'text' => 'form.show_info.text'
             )
         ));
     }

@@ -1,0 +1,7 @@
+form:
+    search:
+        placeholder: "Buscar ubicación"
+        current_position: "Ubicación actual"
+    show_info:
+        title: "Ayuda"
+        text: "Para añadir o modificar la ubicación haz click sobre el mapa"
